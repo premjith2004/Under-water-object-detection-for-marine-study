@@ -6,9 +6,9 @@ The repository contains the following files:
 
 README.md: Typically, this file provides an overview of the project, installation instructions, usage guidelines, and other pertinent information.
 
-Program py.py: This Python script likely contains the main code for the object detection model.
+Program.py: This Python script likely contains the main code for the object detection model.
 
-Program pynb.ipynb: This Jupyter Notebook may offer an interactive environment for data analysis and visualization related to the project.
+Program.ipynb: This Jupyter Notebook may offer an interactive environment for data analysis and visualization related to the project.
 
 Output.pdf: This PDF might include results, graphs, or documentation pertinent to the project's findings.
 
