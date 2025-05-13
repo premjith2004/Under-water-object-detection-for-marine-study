@@ -1,234 +1,52 @@
 # -*- coding: utf-8 -*-
-"""underwater object detection.ipynb
-
+"""underwater object detection
 """
 
 //pip install opencv-python numpy
 
 import cv2
 import numpy as np
-from IPython.display import display
-from google.colab import files
-import io
-from PIL import Image
 
-# Upload file
-uploaded = files.upload()
+# Load the video capture device (e.g., a webcam or a video file)
+cap = cv2.VideoCapture(0)
 
-for fname in uploaded.keys():
-    # Read image
-    image = Image.open(io.BytesIO(uploaded[fname]))
-    image = np.array(image.convert('RGB'))  # Ensure it's RGB
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+while True:
+    # Read a frame from the video
+    ret, frame = cap.read()
+    
+    if not ret:
+        break
+    
+    # Convert the frame to HSV color space
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # Define the range of colors to detect (e.g., blue or green for underwater objects)
+    lower_bound = np.array([100, 50, 50])
+    upper_bound = np.array([130, 255, 255])
+    
+    # Threshold the HSV image to get only the desired colors
+    mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    
+    # Apply morphological operations to remove noise
+    kernel = np.ones((5, 5), np.uint8)
+    mask = cv2.erode(mask, kernel, iterations=1)
+    mask = cv2.dilate(mask, kernel, iterations=1)
+    
+    # Find contours of the detected objects
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # Draw rectangles around the detected objects
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    
+    # Display the output
+    cv2.imshow('Underwater Object Detection', frame)
+    
+    # Exit on key press
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
-    # Resize (optional)
-    image = cv2.resize(image, (640, 480))
-
-    # Convert to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Detect water (blue-green shades)
-    lower_water = np.array([80, 40, 40])
-    upper_water = np.array([130, 255, 255])
-    water_mask = cv2.inRange(hsv, lower_water, upper_water)
-
-    # Invert to get objects
-    object_mask = cv2.bitwise_not(water_mask)
-
-    # Make yellow object highlight
-    yellow = np.zeros_like(image)
-    yellow[:] = (0, 255, 255)
-    highlighted = cv2.bitwise_and(yellow, yellow, mask=object_mask)
-
-    # Create final image with black background
-    black_background = np.zeros_like(image)
-    final_result = cv2.add(black_background, highlighted)
-
-    # Convert BGR to RGB for display
-    display_image = cv2.cvtColor(final_result, cv2.COLOR_BGR2RGB)
-
-    # Show output
-    from matplotlib import pyplot as plt
-    plt.figure(figsize=(10,5))
-    plt.subplot(1,2,1)
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.title("Original Image")
-    plt.axis("off")
-
-    plt.subplot(1,2,2)
-    plt.imshow(display_image)
-    plt.title("Objects in Yellow, Water is Black")
-    plt.axis("off")
-
-    plt.show()
-
-import cv2
-import numpy as np
-from IPython.display import display
-from google.colab import files
-import io
-from PIL import Image
-
-# Upload file
-uploaded = files.upload()
-
-for fname in uploaded.keys():
-    # Read image
-    image = Image.open(io.BytesIO(uploaded[fname]))
-    image = np.array(image.convert('RGB'))  # Ensure it's RGB
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    # Resize (optional)
-    image = cv2.resize(image, (640, 480))
-
-    # Convert to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Detect water (blue-green shades)
-    lower_water = np.array([80, 40, 40])
-    upper_water = np.array([130, 255, 255])
-    water_mask = cv2.inRange(hsv, lower_water, upper_water)
-
-    # Invert to get objects
-    object_mask = cv2.bitwise_not(water_mask)
-
-    # Make yellow object highlight
-    yellow = np.zeros_like(image)
-    yellow[:] = (0, 255, 255)
-    highlighted = cv2.bitwise_and(yellow, yellow, mask=object_mask)
-
-    # Create final image with black background
-    black_background = np.zeros_like(image)
-    final_result = cv2.add(black_background, highlighted)
-
-    # Convert BGR to RGB for display
-    display_image = cv2.cvtColor(final_result, cv2.COLOR_BGR2RGB)
-
-    # Show output
-    from matplotlib import pyplot as plt
-    plt.figure(figsize=(10,5))
-    plt.subplot(1,2,1)
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.title("Original Image")
-    plt.axis("off")
-
-    plt.subplot(1,2,2)
-    plt.imshow(display_image)
-    plt.title("Objects in Yellow, Water is Black")
-    plt.axis("off")
-
-    plt.show()
-
-import cv2
-import numpy as np
-from IPython.display import display
-from google.colab import files
-import io
-from PIL import Image
-
-# Upload file
-uploaded = files.upload()
-
-for fname in uploaded.keys():
-    # Read image
-    image = Image.open(io.BytesIO(uploaded[fname]))
-    image = np.array(image.convert('RGB'))  # Ensure it's RGB
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    # Resize (optional)
-    image = cv2.resize(image, (640, 480))
-
-    # Convert to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Detect water (blue-green shades)
-    lower_water = np.array([80, 40, 40])
-    upper_water = np.array([130, 255, 255])
-    water_mask = cv2.inRange(hsv, lower_water, upper_water)
-
-    # Invert to get objects
-    object_mask = cv2.bitwise_not(water_mask)
-
-    # Make yellow object highlight
-    yellow = np.zeros_like(image)
-    yellow[:] = (0, 255, 255)
-    highlighted = cv2.bitwise_and(yellow, yellow, mask=object_mask)
-
-    # Create final image with black background
-    black_background = np.zeros_like(image)
-    final_result = cv2.add(black_background, highlighted)
-
-    # Convert BGR to RGB for display
-    display_image = cv2.cvtColor(final_result, cv2.COLOR_BGR2RGB)
-
-    # Show output
-    from matplotlib import pyplot as plt
-    plt.figure(figsize=(10,5))
-    plt.subplot(1,2,1)
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.title("Original Image")
-    plt.axis("off")
-
-    plt.subplot(1,2,2)
-    plt.imshow(display_image)
-    plt.title("Objects in Yellow, Water is Black")
-    plt.axis("off")
-
-    plt.show()
-
-import cv2
-import numpy as np
-from IPython.display import display
-from google.colab import files
-import io
-from PIL import Image
-
-# Upload file
-uploaded = files.upload()
-
-for fname in uploaded.keys():
-    # Read image
-    image = Image.open(io.BytesIO(uploaded[fname]))
-    image = np.array(image.convert('RGB'))  # Ensure it's RGB
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    # Resize (optional)
-    image = cv2.resize(image, (640, 480))
-
-    # Convert to HSV
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # Detect water (blue-green shades)
-    lower_water = np.array([80, 40, 40])
-    upper_water = np.array([130, 255, 255])
-    water_mask = cv2.inRange(hsv, lower_water, upper_water)
-
-    # Invert to get objects
-    object_mask = cv2.bitwise_not(water_mask)
-
-    # Make yellow object highlight
-    yellow = np.zeros_like(image)
-    yellow[:] = (0, 255, 255)
-    highlighted = cv2.bitwise_and(yellow, yellow, mask=object_mask)
-
-    # Create final image with black background
-    black_background = np.zeros_like(image)
-    final_result = cv2.add(black_background, highlighted)
-
-    # Convert BGR to RGB for display
-    display_image = cv2.cvtColor(final_result, cv2.COLOR_BGR2RGB)
-
-    # Show output
-    from matplotlib import pyplot as plt
-    plt.figure(figsize=(10,5))
-    plt.subplot(1,2,1)
-    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    plt.title("Original Image")
-    plt.axis("off")
-
-    plt.subplot(1,2,2)
-    plt.imshow(display_image)
-    plt.title("Objects in Yellow, Water is Black")
-    plt.axis("off")
-
-    plt.show()
+# Release the video capture device and close all windows
+cap.release()
+cv2.destroyAllWindows()
